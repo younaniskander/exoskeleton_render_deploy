@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exoskeleton EMG Control Center</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #0a0f1d;
+            --bg-secondary: #131a30;
+            --accent-green: #10b981;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --glass-bg: rgba(19, 26, 48, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 5%;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 15, 29, 0.8);
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo span {
+            color: var(--text-primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-green);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 5rem 5% 3rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 30%, var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .accent-badge {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Main Workspace Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 2.5rem;
+            padding: 2rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .card-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* Connection Config Panel */
+        .config-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .config-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .config-input {
+            width: 100%;
+            background: rgba(10, 15, 29, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .config-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-success {
+            background: var(--accent-green);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Connection Status */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            margin-top: 1rem;
+        }
+
+        .status-indicator.connected {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        /* Virtual EMG Streamer */
+        .emg-channels-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .emg-channels-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .emg-bar-group {
+            background: rgba(10, 15, 29, 0.4);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .emg-bar-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .emg-bar-wrapper {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .emg-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+            border-radius: 4px;
+            transition: width 0.1s linear;
+        }
+
+        /* Leg Angle Visualizer */
+        .visualizer-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .leg-wrapper {
+            position: relative;
+            width: 200px;
+            height: 300px;
+            margin: 2rem 0;
+        }
+
+        .joint {
+            position: absolute;
+            border-radius: 50%;
+            background-color: var(--accent-green);
+            box-shadow: 0 0 15px var(--accent-green);
+            z-index: 10;
+        }
+
+        .joint-hip {
+            top: 20px;
+            left: 100px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .joint-knee {
+            top: 140px;
+            left: 100px;
+            width: 14px;
+            height: 14px;
+            transform-origin: center;
+        }
+
+        .joint-ankle {
+            top: 260px;
+            left: 100px;
+            width: 12px;
+            height: 12px;
+            transform-origin: center;
+        }
+
+        .bone {
+            position: absolute;
+            background: linear-gradient(180deg, var(--accent-blue), var(--accent-purple));
+            width: 6px;
+            border-radius: 4px;
+            transform-origin: top center;
+            z-index: 5;
+        }
+
+        .bone-thigh {
+            top: 28px;
+            left: 105px;
+            height: 112px;
+        }
+
+        .bone-shin {
+            top: 147px;
+            left: 105px;
+            height: 113px;
+        }
+
+        .angle-value-display {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            text-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+            margin-top: 1rem;
+        }
+
+        .angle-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Benefit Cards & Sensor Connection Section */
+        .section-container {
+            max-width: 1400px;
+            margin: 4rem auto;
+            padding: 0 5%;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .benefit-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .benefit-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-5px);
+        }
+
+        .benefit-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .benefit-card h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .benefit-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* Step-by-Step Connection */
+        .step-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .step-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .step-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 1.5rem;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-content p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Muscle Diagram Visualizer */
+        .muscle-diag {
+            background: rgba(10, 15, 29, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            height: 450px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .muscle-svg {
+            height: 90%;
+            stroke: var(--text-secondary);
+            stroke-width: 1;
+            fill: none;
+        }
+
+        .muscle-highlight {
+            fill: rgba(59, 130, 246, 0.2);
+            stroke: var(--accent-blue);
+            stroke-width: 1.5;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .muscle-highlight:hover {
+            fill: rgba(16, 185, 129, 0.4);
+            stroke: var(--accent-green);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Nav Bar -->
+    <nav>
+        <div class="logo">
+            🤖 Exoskeleton <span>EMG Control</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#dashboard">Dashboard</a></li>
+            <li><a href="#benefits">Benefits</a></li>
+            <li><a href="#connection">Connection Guide</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Header -->
+    <header class="hero">
+        <span class="accent-badge">Real-Time Joint Angle Predictor</span>
+        <h1>Synchronize Robotic Exoskeletons With Muscle Intent</h1>
+        <p>This state-of-the-art interface translates microvolt electrical impulses from your lower-limb muscles into dynamic robotic knee-joint angles utilizing pre-trained machine learning.</p>
+    </header>
+
+    <!-- Main Workspace Dashboard Grid -->
+    <main class="dashboard-grid" id="dashboard">
+        
+        <!-- Controls & Signal Processing Panel -->
+        <section class="card">
+            <h2 class="card-title">🔌 Connection & Live Simulation</h2>
+            
+            <div class="config-group">
+                <label class="config-label" for="apiUrl">API Endpoint URL (Local or Remote)</label>
+                <input class="config-input" type="url" id="apiUrl" value="http://127.0.0.1:8000" placeholder="http://127.0.0.1:8000">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <button class="btn btn-success" id="connectBtn" onclick="toggleConnection()">Connect Live API</button>
+                <button class="btn" id="streamBtn" onclick="toggleStreaming()" disabled>Start Virtual EMG Stream</button>
+                <button class="btn" id="bleBtn" onclick="toggleBleConnection()" style="background: linear-gradient(135deg, #2563eb, #3b82f6);">Pair ESP32 (BLE)</button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="status-indicator" id="statusBox">
+                        <span class="status-dot"></span>
+                        <span id="statusText">Disconnected</span>
+                    </div>
+                    <div id="latencyText" style="font-size: 0.9rem; color: var(--text-secondary);">Latency: -- ms</div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="status-indicator" id="bleStatusBox">
+                        <span class="status-dot"></span>
+                        <span id="bleStatusText">BLE: Disconnected</span>
+                    </div>
+                    <div id="bleDeviceText" style="font-size: 0.9rem; color: var(--text-secondary);">Device: None</div>
+                </div>
+            </div>
+
+            <!-- Virtual 11-Channel EMG Signals -->
+            <div class="emg-channels-container">
+                <div class="emg-bar-group">
+                    <div class="emg-bar-label"><span>gastrocmed (Calf)</span><span id="emg-val-0">0.00</span></div>
+                    <div class="emg-bar-wrapper"><div class="emg-bar-fill" id="emg-fill-0"></div></div>
+                </div>
+                <div class="emg-bar-group">
+                    <div class="emg-bar-label"><span>tibialisanterior (Shin)</span><span id="emg-val-1">0.00</span></div>
+                    <div class="emg-bar-wrapper"><div class="emg-bar-fill" id="emg-fill-1"></div></div>
+                </div>
+                <div class="emg-bar-group">
+                    <div class="emg-bar-label"><span>soleus (Calf Base)</span><span id="emg-val-2">0.00</span></div>
+                    <div class="emg-bar-wrapper"><div class="emg-bar-fill" id="emg-fill-2"></div></div>
+                </div>
+                <div class="emg-bar-group">
+                    <div class="emg-bar-label"><span>vastusmedialis (Quad)</span><span id="emg-val-3">0.00</span></div>
+                    <div class="emg-bar-wrapper"><div class="emg-bar-fill" id="emg-fill-3"></div></div>
+                </div>
+                <div class="emg-bar-group">
+                    <div class="emg-bar-label"><span>vastuslateralis (Quad)</span><span id="emg-val-4">0.00</span></div>
+                    <div class="emg-bar-wrapper"><div class="emg-bar-fill" id="emg-fill-4"></div></div>
+                </div>
+                <div class="emg-bar-group">
+                    <div class="emg-bar-label"><span>rectusfemoris (Quad)</span><span id="emg-val-5">0.00</span></div>
+                    <div class="emg-bar-wrapper"><div class="emg-bar-fill" id="emg-fill-5"></div></div>
+                </div>
+                <div class="emg-bar-group">
+                    <div class="emg-bar-label"><span>bicepsfemoris (Hamstring)</span><span id="emg-val-6">0.00</span></div>
+                    <div class="emg-bar-wrapper"><div class="emg-bar-fill" id="emg-fill-6"></div></div>
+                </div>
+                <div class="emg-bar-group">
+                    <div class="emg-bar-label"><span>semitendinosus (Hamstring)</span><span id="emg-val-7">0.00</span></div>
+                    <div class="emg-bar-wrapper"><div class="emg-bar-fill" id="emg-fill-7"></div></div>
+                </div>
+                <div class="emg-bar-group">
+                    <div class="emg-bar-label"><span>gracilis (Inner Thigh)</span><span id="emg-val-8">0.00</span></div>
+                    <div class="emg-bar-wrapper"><div class="emg-bar-fill" id="emg-fill-8"></div></div>
+                </div>
+                <div class="emg-bar-group">
+                    <div class="emg-bar-label"><span>gluteusmedius (Hip)</span><span id="emg-val-9">0.00</span></div>
+                    <div class="emg-bar-wrapper"><div class="emg-bar-fill" id="emg-fill-9"></div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Leg Movement Visualization Card -->
+        <section class="card visualizer-card">
+            <h2 class="card-title">🦵 Leg Kinematic Movement</h2>
+            <div class="leg-wrapper">
+                <!-- Hip -->
+                <div class="joint joint-hip"></div>
+                <!-- Thigh -->
+                <div class="bone bone-thigh" id="thighBone"></div>
+                <!-- Knee -->
+                <div class="joint joint-knee" id="kneeJoint"></div>
+                <!-- Shin -->
+                <div class="bone bone-shin" id="shinBone"></div>
+                <!-- Ankle -->
+                <div class="joint joint-ankle" id="ankleJoint"></div>
+            </div>
+            <div class="angle-value-display" id="angleDisplay">0.0°</div>
+            <div class="angle-label" id="targetInfoLabel">Target: Right Knee Joint Angle (knee_angle_r)</div>
+        </section>
+    </main>
+
+    <!-- Explanations & Project Benefits -->
+    <section class="section-container" id="benefits">
+        <h2 class="section-title">🌟 Benefits & Educational Core Targets</h2>
+        <div class="benefits-grid">
+            <div class="benefit-card">
+                <span class="benefit-icon">⚡</span>
+                <h3>Active Synergy</h3>
+                <p>Robotic systems usually respond after movement occurs. By utilizing EMG sensors, the robotic exoskeleton reads muscle intent, moving in perfect alignment before the leg pushes.</p>
+            </div>
+            <div class="benefit-card">
+                <span class="benefit-icon">🔋</span>
+                <h3>Reduced Energy Cost</h3>
+                <p>Predicting the correct target joint angle allows actuators to apply perfect torque, drastically reducing metabolic energy expense of impaired patients during walk cycles.</p>
+            </div>
+            <div class="benefit-card">
+                <span class="benefit-icon">🏥</span>
+                <h3>Target: Right Knee Joint Angle (knee_angle_r)</h3>
+                <p>The primary regression target is the <strong>Right Knee Joint Angle</strong> (in degrees). The model forecasts knee flexion/extension states ($0^\circ$ straight, up to $60^\circ$ flexed) to provide assistive power.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- EMG Connection Guide -->
+    <section class="section-container" id="connection">
+        <h2 class="section-title">🔧 Connecting Real Hardware EMG Sensors</h2>
+        <div class="step-container">
+            <div class="step-list">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Attach MyoWare / BioAMP Electrodes</h4>
+                        <p>Place standard surface EMG electrodes on target muscle groups like your Quadriceps (Vastus Medialis/Lateralis) and Hamstrings (Biceps Femoris).</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Wire up to Arduino / ESP32</h4>
+                        <p>Connect raw analog sensor outputs to ESP32 / Arduino ADC pins. Sample raw signals at 1000 Hz, bundling the data for all 11 channels.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>HTTP Serial Stream to API</h4>
+                        <p>Write an ESP32 client script to POST JSON payloads containing a sliding window of 200 raw samples at the `/predict` endpoint of this live API!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Virtual Leg Diagram -->
+            <div class="muscle-diag">
+                <svg class="muscle-svg" viewBox="0 0 100 200">
+                    <path class="muscle-highlight" d="M45,20 C40,40 38,70 42,90 C46,90 48,60 48,20 Z" title="Vastus Lateralis" />
+                    <path class="muscle-highlight" d="M55,20 C52,40 50,70 53,90 C57,90 60,60 58,20 Z" title="Vastus Medialis" />
+                    <path class="muscle-highlight" d="M48,90 C46,110 44,140 47,160 C51,160 53,130 52,90 Z" title="Tibialis Anterior" />
+                    <circle cx="50" cy="90" r="4" fill="#3b82f6" />
+                    <circle cx="50" cy="20" r="5" fill="#8b5cf6" />
+                    <line x1="50" y1="20" x2="50" y2="90" stroke="rgba(255,255,255,0.2)" stroke-width="2" />
+                    <line x1="50" y1="90" x2="50" y2="160" stroke="rgba(255,255,255,0.2)" stroke-width="2" />
+                </svg>
+                <div style="position: absolute; bottom: 20px; font-size: 0.8rem; color: var(--text-secondary);">Interactive Leg Electrode Placement Blueprint</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- JavaScript logic -->
+    <script>
+        let isConnected = false;
+        let isStreaming = false;
+        let streamInterval = null;
+        
+        const thighBone = document.getElementById("thighBone");
+        const shinBone = document.getElementById("shinBone");
+        const kneeJoint = document.getElementById("kneeJoint");
+        const ankleJoint = document.getElementById("ankleJoint");
+        const angleDisplay = document.getElementById("angleDisplay");
+        const latencyText = document.getElementById("latencyText");
+        const connectBtn = document.getElementById("connectBtn");
+        const streamBtn = document.getElementById("streamBtn");
+        const statusBox = document.getElementById("statusBox");
+        const statusText = document.getElementById("statusText");
+
+        // Web Bluetooth state
+        let bleDevice = null;
+        let bleCharacteristic = null;
+        const bleBtn = document.getElementById("bleBtn");
+        const bleStatusBox = document.getElementById("bleStatusBox");
+        const bleStatusText = document.getElementById("bleStatusText");
+        const bleDeviceText = document.getElementById("bleDeviceText");
+
+        // BLE UUIDs - standard custom values for ESP32
+        const BLE_SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
+        const BLE_CHARACTERISTIC_UUID = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
+
+        // Sliding window buffer (holds up to 200 samples of 11-channel EMG data)
+        let bleWindowBuffer = [];
+        const BUFFER_SIZE = 200;
+        const NUM_CHANNELS = 11;
+
+        // Set initial positions of bone segments
+        function updateLegVisuals(kneeAngleDegrees) {
+            // kneeAngleDegrees typically ranges from 0 (straight) to ~60 (flexed)
+            // Clamp value to reasonable walking joint parameters
+            let clampedAngle = Math.max(-5, Math.min(80, kneeAngleDegrees));
+            
+            // Shin segment rotates relative to the knee joint
+            // Convert to SVG/CSS rotation: straight leg = 0deg, flexed leg rotates backward
+            shinBone.style.transform = `rotate(${-clampedAngle}deg)`;
+            
+            // Relocate ankle joint relative to shin rotation
+            const thighLength = 112;
+            const shinLength = 113;
+            const thighAngleRad = 0; // Thigh stays relatively straight for baseline visualization
+            
+            // Knee coordinates
+            const kneeX = 105;
+            const kneeY = 140;
+            
+            // Calculate ankle coordinate based on shin rotation
+            const shinAngleRad = (-clampedAngle * Math.PI) / 180;
+            const ankleX = kneeX + shinLength * Math.sin(shinAngleRad);
+            const ankleY = kneeY + shinLength * Math.cos(shinAngleRad);
+            
+            ankleJoint.style.left = `${ankleX - 6}px`;
+            ankleJoint.style.top = `${ankleY - 6}px`;
+            
+            angleDisplay.innerText = `${kneeAngleDegrees.toFixed(1)}°`;
+        }
+
+        // Toggle API connection
+        async function toggleConnection() {
+            const url = document.getElementById("apiUrl").value.trim();
+            if (!url) {
+                alert("Please enter a valid API URL!");
+                return;
+            }
+
+            if (isConnected) {
+                // Disconnect
+                isConnected = false;
+                toggleStreaming(false);
+                connectBtn.innerText = "Connect Live API";
+                connectBtn.className = "btn btn-success";
+                streamBtn.disabled = true;
+                statusBox.className = "status-indicator";
+                statusText.innerText = "Disconnected";
+                latencyText.innerText = "Latency: -- ms";
+                return;
+            }
+
+            // Connecting
+            statusText.innerText = "Connecting...";
+            try {
+                // NOTE: 'ngrok-skip-browser-warning' is required to bypass Ngrok's browser interstitial page
+                const res = await fetch(`${url}/health`, {
+                    method: "GET",
+                    headers: {
+                        "ngrok-skip-browser-warning": "true",
+                        "Accept": "application/json"
+                    }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    isConnected = true;
+                    connectBtn.innerText = "Disconnect API";
+                    connectBtn.className = "btn";
+                    streamBtn.disabled = false;
+                    statusBox.className = "status-indicator connected";
+                    statusText.innerText = `Connected — Model: ${data.loaded_model || 'OK'}`;
+                } else {
+                    throw new Error(`Server returned HTTP ${res.status}`);
+                }
+            } catch (err) {
+                statusBox.className = "status-indicator";
+                statusText.innerText = "Connection Failed";
+                console.error("Connection error:", err);
+                // Show inline error message instead of blocking alert
+                const errBox = document.createElement("div");
+                errBox.style.cssText = "background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:1rem;border-radius:12px;margin-top:1rem;font-size:0.9rem;";
+                errBox.innerText = `Connection failed: ${err.message}. Make sure your API server is running and the URL is correct.`;
+                document.getElementById("connectBtn").parentElement.parentElement.appendChild(errBox);
+                setTimeout(() => errBox.remove(), 6000);
+            }
+        }
+
+        // Toggle Live simulated stream queries
+        function toggleStreaming(forceState = null) {
+            const state = forceState !== null ? forceState : !isStreaming;
+            
+            if (!state) {
+                isStreaming = false;
+                clearInterval(streamInterval);
+                streamBtn.innerText = "Start Virtual EMG Stream";
+                streamBtn.className = "btn";
+                return;
+            }
+
+            // Start streaming
+            isStreaming = true;
+            streamBtn.innerText = "Stop Virtual EMG Stream";
+            streamBtn.className = "btn btn-success";
+            
+            const apiUrl = document.getElementById("apiUrl").value.trim();
+
+            streamInterval = setInterval(async () => {
+                // 1. Generate 200 samples of 11-channel EMG features
+                const windowData = [];
+                const currentEMGVals = [];
+                
+                // Walking Gait modulation simulation
+                const time = Date.now() / 1000;
+                // Core Quadriceps muscle activation waves
+                const quadBase = Math.max(0.01, 0.3 * (1.0 + Math.sin(2 * Math.PI * 0.8 * time)));
+                const hamstringBase = Math.max(0.01, 0.25 * (1.0 + Math.sin(2 * Math.PI * 0.8 * time + Math.PI/3)));
+                
+                for (let ch = 0; ch < 11; ch++) {
+                    const multi = (ch < 6) ? quadBase : hamstringBase;
+                    currentEMGVals.push(multi);
+                }
+
+                // Populate 200 samples
+                for (let i = 0; i < 200; i++) {
+                    const sample = currentEMGVals.map(v => v + (Math.random() * 0.05 - 0.025));
+                    windowData.push(sample);
+                }
+
+                // 2. Update visual bars on screen
+                for (let ch = 0; ch < 10; ch++) {
+                    const fillBar = document.getElementById(`emg-fill-${ch}`);
+                    const valText = document.getElementById(`emg-val-${ch}`);
+                    const percent = Math.min(100, Math.max(0, currentEMGVals[ch] * 150));
+                    fillBar.style.width = `${percent}%`;
+                    valText.innerText = currentEMGVals[ch].toFixed(3);
+                }
+
+                // 3. Post to API
+                const startTime = performance.now();
+                try {
+                    const res = await fetch(`${apiUrl}/predict`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "ngrok-skip-browser-warning": "true"
+                        },
+                        body: JSON.stringify({ emg_window: windowData })
+                    });
+                    
+                    if (res.ok) {
+                        const data = await res.json();
+                        const endTime = performance.now();
+                        latencyText.innerText = `Latency: ${(endTime - startTime).toFixed(1)} ms`;
+                        
+                        // Update robotic knee angle visualization
+                        updateLegVisuals(data.predicted_knee_angle);
+                    }
+                } catch (err) {
+                    console.error("Inference query error: ", err);
+                }
+            }, 300); // 300ms query loops
+        }
+
+        // Bluetooth Connection Toggle
+        async function toggleBleConnection() {
+            if (bleDevice && bleDevice.gatt.connected) {
+                // Disconnect
+                try {
+                    await bleDevice.gatt.disconnect();
+                } catch (e) {
+                    console.error("Error disconnecting BLE:", e);
+                }
+                onBleDisconnected();
+                return;
+            }
+
+            // Start connecting
+            bleStatusText.innerText = "Scanning...";
+            bleStatusBox.className = "status-indicator";
+            
+            try {
+                // Scan for devices advertising our service or any device with 'ESP32' name prefix
+                bleDevice = await navigator.bluetooth.requestDevice({
+                    filters: [
+                        { namePrefix: "ESP32" },
+                        { services: [BLE_SERVICE_UUID] }
+                    ],
+                    optionalServices: [BLE_SERVICE_UUID]
+                });
+
+                bleDeviceText.innerText = `Device: ${bleDevice.name || 'ESP32'}`;
+                bleStatusText.innerText = "Connecting GATT...";
+
+                // Handle unexpected disconnection
+                bleDevice.addEventListener('gattserverdisconnected', onBleDisconnected);
+
+                const server = await bleDevice.gatt.connect();
+                bleStatusText.innerText = "Getting Service...";
+                const service = await server.getPrimaryService(BLE_SERVICE_UUID);
+                bleStatusText.innerText = "Getting Characteristic...";
+                
+                bleCharacteristic = await service.getCharacteristic(BLE_CHARACTERISTIC_UUID);
+                
+                // Enable notifications
+                await bleCharacteristic.startNotifications();
+                bleCharacteristic.addEventListener('characteristicvaluechanged', handleBleDataNotification);
+
+                // Update UI state
+                bleStatusText.innerText = "Connected & Active";
+                bleStatusBox.className = "status-indicator connected";
+                bleBtn.innerText = "Disconnect ESP32";
+                bleBtn.style.background = "#ef4444";
+                
+                // Reset rolling buffer
+                bleWindowBuffer = [];
+            } catch (err) {
+                console.error("Bluetooth Connection Error: ", err);
+                bleStatusText.innerText = "BLE Connect Failed";
+                bleStatusBox.className = "status-indicator";
+                bleDeviceText.innerText = "Device: None";
+                alert(`Bluetooth connection failed: ${err.message || err}`);
+            }
+        }
+
+        function onBleDisconnected() {
+            bleDevice = null;
+            bleCharacteristic = null;
+            bleStatusText.innerText = "BLE: Disconnected";
+            bleStatusBox.className = "status-indicator";
+            bleDeviceText.innerText = "Device: None";
+            bleBtn.innerText = "Pair ESP32 (BLE)";
+            bleBtn.style.background = "linear-gradient(135deg, #2563eb, #3b82f6)";
+        }
+
+        // Parse incoming ESP32 BLE packet and update sliding window buffer
+        function handleBleDataNotification(event) {
+            const value = event.target.value;
+            const decoder = new TextDecoder('utf-8');
+            const dataString = decoder.decode(value).trim();
+            
+            // Expected Format from ESP32: Comma separated values representing 11 channels
+            // e.g., "0.12,0.45,0.02,0.88,0.12,0.33,0.45,0.01,0.02,0.11,0.05"
+            try {
+                const parts = dataString.split(',');
+                if (parts.length < 10) return; // Ignore malformed packages
+
+                const channels = parts.map(val => parseFloat(val) || 0.0);
+                
+                // Fill any missing channels if ESP32 sends less than 11
+                while (channels.length < NUM_CHANNELS) {
+                    channels.push(0.0);
+                }
+                
+                // 1. Push to sliding window buffer
+                bleWindowBuffer.push(channels);
+                if (bleWindowBuffer.length > BUFFER_SIZE) {
+                    bleWindowBuffer.shift(); // Remove oldest sample to keep size at 200
+                }
+
+                // 2. Update UI Visual Bars (using the latest sample values)
+                for (let ch = 0; ch < 10; ch++) {
+                    const fillBar = document.getElementById(`emg-fill-${ch}`);
+                    const valText = document.getElementById(`emg-val-${ch}`);
+                    const percent = Math.min(100, Math.max(0, channels[ch] * 150));
+                    if (fillBar) fillBar.style.width = `${percent}%`;
+                    if (valText) valText.innerText = channels[ch].toFixed(3);
+                }
+
+                // 3. If we have a full window (200 samples) and we are connected to the API, send it for prediction
+                if (bleWindowBuffer.length === BUFFER_SIZE && isConnected) {
+                    sendWindowToApi(bleWindowBuffer);
+                }
+            } catch (err) {
+                console.error("Error parsing BLE notification: ", err);
+            }
+        }
+
+        // Throttle API sends to avoid overloading the network
+        let lastApiSendTime = 0;
+        const API_SEND_THROTTLE_MS = 200;
+
+        async function sendWindowToApi(windowData) {
+            const now = performance.now();
+            if (now - lastApiSendTime < API_SEND_THROTTLE_MS) return;
+            lastApiSendTime = now;
+
+            const apiUrl = document.getElementById("apiUrl").value.trim();
+            const startTime = performance.now();
+
+            try {
+                const res = await fetch(`${apiUrl}/predict`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "ngrok-skip-browser-warning": "true"
+                    },
+                    body: JSON.stringify({ emg_window: windowData })
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    const endTime = performance.now();
+                    latencyText.innerText = `Latency: ${(endTime - startTime).toFixed(1)} ms`;
+                    updateLegVisuals(data.predicted_knee_angle);
+                }
+            } catch (err) {
+                console.error("BLE inference query error: ", err);
+            }
+        }
+    </script>
+</body>
+</html>
