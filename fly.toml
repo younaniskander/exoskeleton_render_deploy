@@ -1,0 +1,6 @@
+# fly.toml app configuration file generated for exoskeleton-api on 2026-05-27T13:45:15Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'exoskeleton-api'
