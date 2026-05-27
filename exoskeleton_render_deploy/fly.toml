@@ -17,13 +17,7 @@ kill_timeout = '5s'
 [[services]]
   protocol = 'tcp'
   internal_port = 8000
-
-  [[services.ports]]
-    port = 80
-    handlers = ['http']
-
-  [[services.ports]]
-    port = 443
+  ports = [80, 443]
 
   [services.concurrency]
     type = 'connections'
