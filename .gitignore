@@ -10,5 +10,8 @@ _temp_decomp.bin
 *.pt
 *.pth
 
+# Keep the deployed model artifact in version control
+!exoskeleton_render_deploy/best_regressor_model.pkl
+
 Data_repository_for_Camargo/
 *.log
