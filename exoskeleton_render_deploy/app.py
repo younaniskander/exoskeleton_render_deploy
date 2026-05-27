@@ -160,6 +160,6 @@ if __name__ == '__main__':
     import uvicorn
     # Bind to 0.0.0.0 to allow external access and read port from environment variable if deploying
     host = os.getenv("HOST", "0.0.0.0")
-    port = int(os.getenv("PORT", 8000))
+    port = int(os.getenv("PORT", 8080))
     print(f"Starting production server on {host}:{port}...")
     uvicorn.run("app:app", host=host, port=port, reload=False)
