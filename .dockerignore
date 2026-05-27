@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.git
+.gitignore
+Dockerfile
+fly.toml
+*.log
+*.ipynb
+.venv/
+venv/
+node_modules/
